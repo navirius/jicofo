@@ -35,6 +35,7 @@ import org.jxmpp.stringprep.*;
 import org.osgi.framework.*;
 
 import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 /**
@@ -688,6 +689,11 @@ public class BridgeSelector
     private static abstract class BridgeSelectionStrategy
     {
         /**
+         * Helper field to avoid allocating a new array for use in loop below.
+         */
+        private static final boolean[] FALSE_TRUE = new boolean[] { false, true };
+
+        /**
          * The local region of the jicofo instance.
          */
         private String localRegion = null;
@@ -767,22 +773,28 @@ public class BridgeSelector
         {
             Bridge bridge = null;
 
-            // Prefer a bridge in the participant's region.
-            if (participantRegion != null)
+            for (boolean includeBridgesInSurvivalMode : FALSE_TRUE)
             {
-                bridge = findFirstOperationalInRegion(bridges, participantRegion);
-            }
+                // Prefer a bridge in the participant's region.
+                if (bridge == null && participantRegion != null)
+                {
+                    bridge = findFirstOperationalInRegion(
+                        bridges, participantRegion, includeBridgesInSurvivalMode);
+                }
 
-            // Otherwise, prefer a bridge in the local region.
-            if (bridge == null)
-            {
-                bridge = findFirstOperationalInRegion(bridges, localRegion);
-            }
+                // Otherwise, prefer a bridge in the local region.
+                if (bridge == null)
+                {
+                    bridge = findFirstOperationalInRegion(
+                        bridges, localRegion, includeBridgesInSurvivalMode);
+                }
 
-            // Otherwise, just find the first operational bridge.
-            if (bridge == null)
-            {
-                bridge = findFirstOperationalInRegion(bridges, null);
+                // Otherwise, just find the first operational bridge.
+                if (bridge == null)
+                {
+                    bridge = findFirstOperationalInRegion(
+                        bridges, null, includeBridgesInSurvivalMode);
+                }
             }
 
             return bridge;
@@ -795,14 +807,17 @@ public class BridgeSelector
          *
          * @param bridges
          * @param region
+         * @param includeBridgesInSurvivalMode
          * @return
          */
         private Bridge findFirstOperationalInRegion(
                 List<Bridge> bridges,
-                String region)
+                String region,
+                boolean includeBridgesInSurvivalMode)
         {
             return bridges.stream()
                     .filter(Bridge::isOperational)
+                    .filter(b -> includeBridgesInSurvivalMode || !b.isInSurvivalMode())
                     .filter(
                         b -> region == null || region.equals(b.getRegion()))
                     .findFirst()
@@ -1002,9 +1017,20 @@ public class BridgeSelector
             List<Bridge> selectFrom, List<Bridge> order)
         {
             return order.stream()
+                .filter(not(Bridge::isInSurvivalMode))
                 .filter(selectFrom::contains)
                 .findFirst()
-                .orElse(selectFrom.get(0));
+                .orElse(selectFrom.stream()
+                    .filter(not(Bridge::isInSurvivalMode))
+                    .findFirst()
+                    .orElse(order.stream()
+                        .filter(selectFrom::contains)
+                        .findFirst()
+                        .orElse(selectFrom.get(0))));
         }
+    }
+
+    public static <T> Predicate<T> not(Predicate<T> t) {
+        return t.negate();
     }
 }

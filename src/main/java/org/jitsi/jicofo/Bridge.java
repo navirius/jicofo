@@ -50,6 +50,8 @@ public class Bridge
     private static final ColibriStatsExtension EMPTY_STATS
         = new ColibriStatsExtension();
 
+    private static final int RECOMMENDED_MAX_VIDEO_STREAMS = -1;
+
     /**
      * The parent {@link BridgeSelector}.
      */
@@ -347,5 +349,11 @@ public class Bridge
                      jid.toString(),
                      getRelayId(),
                      getRegion());
+    }
+
+    public boolean isInSurvivalMode()
+    {
+        // XXX ideally this flag comes directly from the bridge
+        return getEstimatedVideoStreamCount() > RECOMMENDED_MAX_VIDEO_STREAMS;
     }
 }
