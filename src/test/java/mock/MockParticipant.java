@@ -292,6 +292,8 @@ public class MockParticipant
 
         initContents();
 
+        processStanza(invite);
+
         JingleIQ user1Accept = generateSessionAccept(
             invite,
             createTransportMap(invite));
@@ -465,8 +467,29 @@ public class MockParticipant
         JingleIQ modifySSRcIq = (JingleIQ) packet;
         JingleAction action = modifySSRcIq.getAction();
 
-        if (JingleAction.SOURCEADD.equals(action)
-                || JingleAction.ADDSOURCE.equals(action))
+        if (JingleAction.SESSION_INITIATE.equals(action))
+        {
+            synchronized (sourceLock)
+            {
+                MediaSourceMap ssrcMap
+                        = MediaSourceMap.getSourcesFromContent(
+                        modifySSRcIq.getContentList());
+
+                remoteSSRCs.add(ssrcMap);
+
+                MediaSourceGroupMap ssrcGroupMap
+                        = MediaSourceGroupMap.getSourceGroupsForContents(
+                        modifySSRcIq.getContentList());
+
+                remoteSSRCgroups.add(ssrcGroupMap);
+
+                logger.info(nick + " received session-initiate: " + ssrcMap  + " groups: " + ssrcGroupMap);
+
+                sourceLock.notifyAll();
+            }
+        }
+        else  if (JingleAction.SOURCEADD.equals(action)
+                    || JingleAction.ADDSOURCE.equals(action))
         {
             synchronized (sourceLock)
             {
@@ -482,7 +505,7 @@ public class MockParticipant
 
                 remoteSSRCgroups.add(ssrcGroupMap);
 
-                logger.info("source-add received " + nick + " " + ssrcMap);
+                logger.info(nick + " received source-add " + ssrcMap);
 
                 try
                 {
@@ -513,8 +536,7 @@ public class MockParticipant
 
                 remoteSSRCgroups.remove(ssrcGroupsToRemove);
 
-                logger.info(
-                    "source-remove received " + nick + " " + ssrcsToRemove);
+                logger.info(nick + " source-remove received " + ssrcsToRemove);
 
                 try
                 {
@@ -575,6 +597,32 @@ public class MockParticipant
     public List<SourcePacketExtension> audioSourceAdd(int count)
     {
         return sourceAdd("audio", count, false, null);
+    }
+
+    public void audioSourceRemove(int count)
+    {
+        List<SourcePacketExtension> audioSources
+                = this.localSSRCs.getSourcesForMedia("audio");
+
+        if (audioSources.size() < count)
+        {
+            throw new IllegalArgumentException(
+                    "audio source size(" + audioSources.size()
+                            + ") < count(" + count + ")");
+        }
+
+        List<SourcePacketExtension> toRemove = new ArrayList<>(count);
+
+        for(int i = 0; i < count; i++)
+        {
+            toRemove.add(audioSources.remove(0));
+        }
+
+        MediaSourceMap removeMap = new MediaSourceMap();
+
+        removeMap.addSources("audio", toRemove);
+
+        jingle.sendRemoveSourceIQ(removeMap, null, jingleSession);
     }
 
     private List<SourcePacketExtension> sourceAdd(

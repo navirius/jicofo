@@ -17,6 +17,7 @@
  */
 package org.jitsi.jicofo;
 
+import org.jitsi.jicofo.bridge.*;
 import org.jitsi.utils.*;
 import org.jitsi.xmpp.extensions.colibri.*;
 import org.jitsi.xmpp.extensions.jingle.*;
@@ -1933,6 +1934,9 @@ public class JitsiMeetConferenceImpl
                     "No sources or groups to be removed from: "+ participantJid);
             return null;
         }
+
+        participant.removeSources(removedSources);
+        participant.removeSourceGroups(removedGroups);
 
         // We remove all ssrc params from SourcePacketExtension as we want
         // the client to simply remove all lines corresponding to given SSRC and

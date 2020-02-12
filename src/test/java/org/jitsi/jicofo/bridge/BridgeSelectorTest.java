@@ -15,16 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jitsi.jicofo;
+package org.jitsi.jicofo.bridge;
 
 import mock.*;
 import mock.xmpp.*;
 import mock.xmpp.pubsub.*;
 
+import org.jitsi.jicofo.*;
 import org.jitsi.xmpp.extensions.colibri.*;
 import net.java.sip.communicator.util.*;
-
-import org.jivesoftware.smack.packet.*;
 
 import org.junit.*;
 import org.junit.runner.*;
@@ -45,7 +44,7 @@ import static org.junit.Assert.*;
 @RunWith(JUnit4.class)
 public class BridgeSelectorTest
 {
-    static OSGiHandler osgi = OSGiHandler.getInstance();
+    private static OSGiHandler osgi = OSGiHandler.getInstance();
 
     private static Jid jvb1Jid;
     private static Jid jvb2Jid;
@@ -125,6 +124,7 @@ public class BridgeSelectorTest
         createMockJvbNodes(meetServices, mockProvider);
 
         BridgeSelector selector = meetServices.getBridgeSelector();
+        JitsiMeetConference conference = new MockJitsiMeetConference();
 
         // Check pub-sub nodes mapping
         assertEquals(jvb1Jid,
@@ -140,7 +140,7 @@ public class BridgeSelectorTest
         workingBridges.add(jvb2Jid);
         workingBridges.add(jvb3Jid);
 
-        Bridge bridgeState = selector.selectBridge(null);
+        Bridge bridgeState = selector.selectBridge(conference);
         assertTrue(workingBridges.contains(bridgeState.getJid()));
 
         // Bridge 1 is down !!!
@@ -148,13 +148,13 @@ public class BridgeSelectorTest
         jvb1.setIsOperational(false);
 
         assertTrue(workingBridges.contains(
-                selector.selectBridge(null).getJid()));
+                selector.selectBridge(conference).getJid()));
 
         // Bridge 2 is down !!!
         workingBridges.remove(jvb2Jid);
         jvb2.setIsOperational(false);
 
-        assertEquals(jvb3Jid, selector.selectBridge(null).getJid());
+        assertEquals(jvb3Jid, selector.selectBridge(conference).getJid());
 
         // Bridge 1 is up again, but 3 is down instead
         workingBridges.add(jvb1Jid);
@@ -163,7 +163,7 @@ public class BridgeSelectorTest
         workingBridges.remove(jvb3Jid);
         jvb3.setIsOperational(false);
 
-        assertEquals(jvb1Jid, selector.selectBridge(null).getJid());
+        assertEquals(jvb1Jid, selector.selectBridge(conference).getJid());
 
         // Reset all bridges - now we'll select based on conference count
         workingBridges.clear();
@@ -188,23 +188,23 @@ public class BridgeSelectorTest
         mockSubscriptions.fireSubscriptionNotification(
             jvb3PubSubNode, itemId, createJvbStats(0));
 
-        assertEquals(jvb3Jid, selector.selectBridge(null).getJid());
+        assertEquals(jvb3Jid, selector.selectBridge(conference).getJid());
 
         // Now Jvb 3 gets occupied the most
         mockSubscriptions.fireSubscriptionNotification(
             jvb3PubSubNode, itemId, createJvbStats(300));
 
-        assertEquals(jvb1Jid, selector.selectBridge(null).getJid());
+        assertEquals(jvb1Jid, selector.selectBridge(conference).getJid());
 
         // Jvb 1 is gone
         jvb1.setIsOperational(false);
 
-        assertEquals(jvb2Jid, selector.selectBridge(null).getJid());
+        assertEquals(jvb2Jid, selector.selectBridge(conference).getJid());
 
         // TEST all bridges down
         jvb2.setIsOperational(false);
         jvb3.setIsOperational(false);
-        assertEquals(null, selector.selectBridge(null));
+        assertNull(selector.selectBridge(conference));
 
         // Now bridges are up and select based on conference count
         // with pre-configured bridge
@@ -221,7 +221,7 @@ public class BridgeSelectorTest
 
         // JVB 1 should not be in front
         assertNotEquals(
-                jvb1PubSubNode, selector.selectBridge(null).getJid());
+                jvb1PubSubNode, selector.selectBridge(conference).getJid());
 
         // JVB 2 least occupied
         mockSubscriptions.fireSubscriptionNotification(
@@ -231,16 +231,16 @@ public class BridgeSelectorTest
         mockSubscriptions.fireSubscriptionNotification(
                 jvb3PubSubNode, itemId, createJvbStats(1));
 
-        assertEquals(jvb2Jid, selector.selectBridge(null).getJid());
+        assertEquals(jvb2Jid, selector.selectBridge(conference).getJid());
 
         // FAILURE RESET THRESHOLD
         testFailureResetThreshold(selector, mockSubscriptions);
 
         // Test drain bridges queue
         int maxCount = selector.getKnownBridgesCount();
-        while (selector.selectBridge(null) != null)
+        while (selector.selectBridge(conference) != null)
         {
-            Bridge bridge = selector.selectBridge(null);
+            Bridge bridge = selector.selectBridge(conference);
             bridge.setIsOperational(false);
             if (--maxCount < 0)
             {
@@ -281,20 +281,25 @@ public class BridgeSelectorTest
             // Should not be selected now
             assertNotEquals(
                     nodes[testNode],
-                    selector.selectBridge(null).getJid());
+                    selector.selectBridge(new MockJitsiMeetConference()).getJid());
             // Wait for faulty status reset
             Thread.sleep(150);
             // Test node should recover
             assertEquals(
                     nodes[testNode],
-                    selector.selectBridge(null).getJid());
+                    selector.selectBridge(new MockJitsiMeetConference()).getJid());
         }
 
         selector.setFailureResetThreshold(
             BridgeSelector.DEFAULT_FAILURE_RESET_THRESHOLD);
     }
 
-    ExtensionElement createJvbStats(int bitrate)
+    private ColibriStatsExtension createJvbStats(int bitrate)
+    {
+        return createJvbStats(bitrate, null);
+    }
+
+    private ColibriStatsExtension createJvbStats(int bitrate, String region)
     {
         ColibriStatsExtension statsExtension = new ColibriStatsExtension();
 
@@ -305,7 +310,91 @@ public class BridgeSelectorTest
                 new ColibriStatsExtension.Stat(
                 BITRATE_UPLOAD, bitrate));
 
+        if (region != null)
+        {
+            statsExtension.addStat(
+                    new ColibriStatsExtension.Stat(
+                           REGION, region));
+            statsExtension.addStat(
+                    new ColibriStatsExtension.Stat(
+                            RELAY_ID, region));
+        }
+
         return statsExtension;
+    }
+
+    @Test
+    public void testRegionBasedSelection()
+            throws Exception
+    {
+        JitsiMeetServices meetServices
+                = ServiceUtils.getService(osgi.bc, JitsiMeetServices.class);
+        BridgeSelector selector = meetServices.getBridgeSelector();
+
+        String region1 = "region1";
+        Bridge bridge1 = selector.addJvbAddress(JidCreate.from("bridge1"));
+        bridge1.setStats(createJvbStats(0, region1));
+
+        String region2 = "region2";
+        Bridge bridge2 = selector.addJvbAddress(JidCreate.from("bridge2"));
+        bridge2.setStats(createJvbStats(0, region2));
+
+        String region3 = "region3";
+        Bridge bridge3 = selector.addJvbAddress(JidCreate.from("bridge3"));
+        bridge3.setStats(createJvbStats(0, region3));
+
+        Bridge localBridge = bridge1;
+        BridgeSelectionStrategy strategy
+                = new RegionBasedBridgeSelectionStrategy();
+        strategy.setLocalRegion(localBridge.getRegion());
+
+
+        List<Bridge> allBridges
+                = Arrays.asList(bridge1, bridge2, bridge3);
+        List<Bridge> conferenceBridges = new LinkedList<>();
+
+        // Initial selection should select a bridge in the participant's region
+        // if possible
+        assertEquals(
+            bridge1,
+            strategy.select(allBridges, conferenceBridges, region1, true));
+        assertEquals(
+            bridge2,
+            strategy.select(allBridges, conferenceBridges, region2, true));
+        // Or a bridge in the local region otherwise
+        assertEquals(
+            localBridge,
+            strategy.select(allBridges, conferenceBridges, "invalid region", true));
+        assertEquals(
+            localBridge,
+            strategy.select(allBridges, conferenceBridges, null, true));
+
+        conferenceBridges.add(bridge3);
+        assertEquals(
+                bridge3,
+                strategy.select(allBridges, conferenceBridges, region3, true));
+        assertEquals(
+                bridge2,
+                strategy.select(allBridges, conferenceBridges, region2, true));
+        // A participant in an unknown region should be allocated on the existing
+        // conference bridge.
+        assertEquals(
+                bridge3,
+                strategy.select(allBridges, conferenceBridges, null, true));
+
+        conferenceBridges.add(bridge2);
+        // A participant in an unknown region should be allocated on the least
+        // loaded (according to the order of 'allBridges') existing conference
+        // bridge.
+        assertEquals(
+                bridge2,
+                strategy.select(allBridges, conferenceBridges, null, true));
+        // A participant in a region with no bridges should also be allocated
+        // on the least loaded (according to the order of 'allBridges') existing
+        // conference bridge.
+        assertEquals(
+                bridge2,
+                strategy.select(allBridges, conferenceBridges, "invalid region", true));
     }
 }
 
