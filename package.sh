@@ -1,0 +1,1 @@
+mvn package -DskipTests -Dassembly.skipAssembly=false

@@ -17,10 +17,15 @@
  */
 package org.jitsi.jicofo.auth;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
+import org.jitsi.jicofo.auth.model.UserTypeRequestModel;
+import org.jitsi.jicofo.auth.model.UserTypeResponseModel;
+import org.jitsi.jicofo.util.RetrofitCallback;
+import org.jitsi.jicofo.util.RetrofitInstance;
 import org.jitsi.xmpp.extensions.jitsimeet.*;
 import org.jitsi.jicofo.*;
 import org.jitsi.jicofo.event.*;
@@ -32,6 +37,9 @@ import org.jivesoftware.smack.packet.*;
 
 import net.java.sip.communicator.util.*;
 import org.jxmpp.jid.*;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Common class for {@link AuthenticationAuthority} implementations.
@@ -505,6 +513,31 @@ public abstract class AbstractAuthAuthority
         response.setSessionId(session.getSessionId());
     }
 
+    protected void authenticateJidWithBackend(AuthenticationSession session, Jid peerJid, ConferenceIq responseConf)
+    {
+        String userIdWithDomain = peerJid.toString();
+        String[] splitedString = userIdWithDomain.split("@", 2);
+        if(splitedString.length == 2)
+        {
+            logger.debug("Request getUserType API. User id: "+splitedString[0]);
+            try
+            {
+                Response<UserTypeResponseModel> response = RetrofitInstance.getInstance()
+                        .create(VirtualClassroomService.class)
+                        .getUserType(new UserTypeRequestModel(splitedString[0], ""))
+                        .execute();
+
+                UserTypeResponseModel userTypeResponseModel = response.body();
+                if(userTypeResponseModel.isStatus())
+                {
+                    authenticateJidWithSession(session, peerJid, responseConf);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
     /**
      * {@inheritDoc}
      */

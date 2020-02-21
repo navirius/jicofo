@@ -79,4 +79,9 @@ public interface XmppChatMember
      * @return the statistics ID for this member.
      */
     String getStatsId();
+
+    public static final String USER_TYPE_TEACHER = "teacher";
+    public static final String USER_TYPE_STUDENT = "student";
+    public static final String USER_TYPE_STAFF = "staff";
+    String getUserType();
 }
