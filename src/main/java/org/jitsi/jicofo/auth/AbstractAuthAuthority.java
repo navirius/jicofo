@@ -22,6 +22,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
+import org.jitsi.jicofo.auth.model.UserLoginRequestModel;
+import org.jitsi.jicofo.auth.model.UserLoginResponModel;
 import org.jitsi.jicofo.auth.model.UserTypeRequestModel;
 import org.jitsi.jicofo.auth.model.UserTypeResponseModel;
 import org.jitsi.jicofo.util.RetrofitCallback;
@@ -522,14 +524,14 @@ public abstract class AbstractAuthAuthority
             logger.debug("Request getUserType API. User id: "+splitedString[0]);
             try
             {
-                Response<UserTypeResponseModel> response = RetrofitInstance.getInstance()
+                Response<UserLoginResponModel> response = RetrofitInstance.getInstance()
                         .create(VirtualClassroomService.class)
-                        .getUserType(new UserTypeRequestModel(splitedString[0], ""))
+                        .userLogin(new UserLoginRequestModel(splitedString[0], splitedString[0]))
                         .execute();
 
                 if(response!=null && response.body()!=null)
                 {
-                    UserTypeResponseModel userTypeResponseModel = response.body();
+                    UserLoginResponModel userTypeResponseModel = response.body();
                     if(userTypeResponseModel.isStatus())
                     {
                         authenticateJidWithSession(session, peerJid, responseConf);
