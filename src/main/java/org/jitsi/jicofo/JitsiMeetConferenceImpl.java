@@ -2288,11 +2288,12 @@ public class JitsiMeetConferenceImpl
         }
 
         // do not allow unmuting other participants even for the moderator
-        if (!doMute && !fromJid.equals(toBeMutedJid))
-        {
-            logger.warn("Blocking an unmute request (jid not the same).");
-            return false;
-        }
+//        if (!doMute && !fromJid.equals(toBeMutedJid))
+//        {
+//            logger.warn("Blocking an unmute request (jid not the same).");
+//            return false;
+//        }
+        //navirius - above logic change to - only moderator can unmute and mute others
 
         // we do not want to remotely mute jigasi as currently
         // there is no way for it to unmute
