@@ -10,6 +10,7 @@ public class UserTypeRequestModel extends BaseRequestModel {
 
     public UserTypeRequestModel(String userId, String classroomId)
     {
+        this.userIdRequest="";
         this.userId = userId;
         this.classroomId = classroomId;
     }

@@ -13,7 +13,7 @@ public class UnsafeOkHttpClient {
     {
         try
         {
-            if(!AppConstants.VCLASROOM_URL.contains("https://"))
+            if(!AppConstants.VCLASROOM_SERVICE_URL.contains("https://"))
                 return builder;
             // Create a trust manager that does not validate certificate chains
             final TrustManager[] trustAllCerts = new TrustManager[] {

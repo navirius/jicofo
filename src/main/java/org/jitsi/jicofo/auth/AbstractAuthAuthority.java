@@ -527,11 +527,15 @@ public abstract class AbstractAuthAuthority
                         .getUserType(new UserTypeRequestModel(splitedString[0], ""))
                         .execute();
 
-                UserTypeResponseModel userTypeResponseModel = response.body();
-                if(userTypeResponseModel.isStatus())
+                if(response!=null && response.body()!=null)
                 {
-                    authenticateJidWithSession(session, peerJid, responseConf);
+                    UserTypeResponseModel userTypeResponseModel = response.body();
+                    if(userTypeResponseModel.isStatus())
+                    {
+                        authenticateJidWithSession(session, peerJid, responseConf);
+                    }
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

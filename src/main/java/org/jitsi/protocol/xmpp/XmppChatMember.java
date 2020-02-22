@@ -84,4 +84,5 @@ public interface XmppChatMember
     public static final String USER_TYPE_STUDENT = "student";
     public static final String USER_TYPE_STAFF = "staff";
     String getUserType();
+    String getUserId();
 }

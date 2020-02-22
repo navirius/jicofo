@@ -95,8 +95,8 @@ public class XMPPDomainAuthAuthority
         // Authenticate JID with session(if it exists)
         if (session != null)
         {
-            //authenticateJidWithSession(session, peerJid, response);
-            authenticateJidWithBackend(session, peerJid, response);
+            authenticateJidWithSession(session, peerJid, response);
+            //authenticateJidWithBackend(session, peerJid, response);
         }
 
         return null;

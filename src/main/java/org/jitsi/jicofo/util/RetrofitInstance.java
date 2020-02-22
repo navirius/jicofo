@@ -36,7 +36,7 @@ public class RetrofitInstance {
         {
             retrofit = new Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().serializeNulls().create()))
-                    .baseUrl(AppConstants.VCLASROOM_URL)
+                    .baseUrl(AppConstants.VCLASROOM_SERVICE_URL)
                     .client(getHeaders().build())
                     .build();
         }
@@ -45,13 +45,11 @@ public class RetrofitInstance {
     public static Retrofit createInstance() {
         Retrofit  retrofit2 = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().serializeNulls().create()))
-                .baseUrl(AppConstants.VCLASROOM_URL)
+                .baseUrl(AppConstants.VCLASROOM_SERVICE_URL)
                 .build();
 
         return retrofit2;
     }
-
-
 
 
     /**
@@ -122,7 +120,7 @@ public class RetrofitInstance {
 
     private static JSONObject getFooter(){
         JSONObject footer = new JSONObject();
-        footer.put("appName", "Jicofo");
+        footer.put("appName", "jicofo");
         footer.put("appLanguage", "EN");
         footer.put("appVersion", "1.0");
         return footer;

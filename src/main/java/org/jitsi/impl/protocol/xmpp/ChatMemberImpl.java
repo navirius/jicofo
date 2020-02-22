@@ -18,6 +18,11 @@
 package org.jitsi.impl.protocol.xmpp;
 
 import net.java.sip.communicator.impl.protocol.jabber.*;
+import org.jitsi.jicofo.auth.VirtualClassroomService;
+import org.jitsi.jicofo.auth.model.UserTypeRequestModel;
+import org.jitsi.jicofo.auth.model.UserTypeResponseModel;
+import org.jitsi.jicofo.util.RetrofitCallback;
+import org.jitsi.jicofo.util.RetrofitInstance;
 import org.jitsi.xmpp.extensions.jitsimeet.*;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.globalstatus.*;
@@ -29,6 +34,11 @@ import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smackx.muc.*;
 import org.jxmpp.jid.*;
 import org.jxmpp.jid.parts.*;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import java.io.IOException;
 
 /**
  * Stripped Smack implementation of {@link ChatRoomMember}.
@@ -167,10 +177,16 @@ public class ChatMemberImpl
     {
         if (this.role == null)
         {
+            String vClassRoomUserType = getUserType();
             Occupant o = chatRoom.getOccupant(this);
 
             if (o == null)
             {
+                if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_STUDENT))
+                    return ChatRoomMemberRole.GUEST;
+                else if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
+                    return ChatRoomMemberRole.MODERATOR;
+
                 return ChatRoomMemberRole.GUEST;
             }
             else
@@ -178,6 +194,14 @@ public class ChatMemberImpl
                 this.role
                     = ChatRoomJabberImpl.smackRoleToScRole(
                         o.getRole(), o.getAffiliation());
+
+                if(role ==  ChatRoomMemberRole.MODERATOR && vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
+                    role = ChatRoomMemberRole.MODERATOR;
+                else if(role == ChatRoomMemberRole.GUEST && vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_STUDENT))
+                    role = ChatRoomMemberRole.GUEST;
+                else
+                    role = ChatRoomMemberRole.GUEST;
+
             }
         }
         return this.role;
@@ -344,6 +368,54 @@ public class ChatMemberImpl
     public String getStatsId()
     {
         return statsId;
+    }
+
+    String userType;
+    @Override
+    public String getUserType()
+    {
+        if(userType!=null)
+            return userType;
+
+        try
+        {
+            Response<UserTypeResponseModel> response = RetrofitInstance.createInstance()
+                    .create(VirtualClassroomService.class)
+                    .getUserType(new UserTypeRequestModel(getUserId(),""))
+                    .execute();
+
+            if(response != null && response.body()!=null)
+            {
+                userType = response.body().getUserType();
+                return userType;
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+
+        }
+        return "";
+    }
+
+    @Override
+    public String getUserId()
+    {
+        String jid = getJid().toString();
+        logger.debug("getUserId(): jid "+jid);
+        if(jid.contains("@"))
+        {
+            String[] splitJid = jid.split("@", 2);
+            if (splitJid.length == 2)
+            {
+                logger.debug("getUserId(): splitJid "+ splitJid);
+                return splitJid[0];
+            }
+            else
+                return "";
+        }
+        else
+            return jid;
     }
 
     /**

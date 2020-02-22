@@ -194,4 +194,16 @@ public class MockRoomMember
     {
         return null;
     }
+
+    @Override
+    public String getUserType()
+    {
+        return null;
+    }
+
+    @Override
+    public String getUserId()
+    {
+        return null;
+    }
 }
