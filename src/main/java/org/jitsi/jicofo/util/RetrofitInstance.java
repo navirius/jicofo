@@ -1,6 +1,6 @@
 package org.jitsi.jicofo.util;
 
-import com.facebook.stetho.okhttp3.StethoInterceptor;
+//import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
@@ -60,7 +60,7 @@ public class RetrofitInstance {
                 .connectTimeout(AppConstants.AppTimeOut, TimeUnit.SECONDS)
                 .readTimeout(AppConstants.AppTimeOut, TimeUnit.SECONDS)
                 .writeTimeout(AppConstants.AppTimeOut, TimeUnit.SECONDS)
-                .addNetworkInterceptor(new StethoInterceptor())
+                //.addNetworkInterceptor(new StethoInterceptor())
                 .addInterceptor(createLoggingBodyInterceptor())
                 .addInterceptor(new Interceptor() {
                     @Override
