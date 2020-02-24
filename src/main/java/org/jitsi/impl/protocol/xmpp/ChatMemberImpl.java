@@ -175,19 +175,38 @@ public class ChatMemberImpl
     @Override
     public ChatRoomMemberRole getRole()
     {
+//        if (this.role == null)
+//        {
+//            Occupant o = chatRoom.getOccupant(this);
+//
+//            if (o == null)
+//            {
+//                return ChatRoomMemberRole.GUEST;
+//            }
+//            else
+//            {
+//                this.role
+//                        = ChatRoomJabberImpl.smackRoleToScRole(
+//                        o.getRole(), o.getAffiliation());
+//            }
+//        }
+//        return this.role;
         if (this.role == null)
         {
             String vClassRoomUserType = getUserType();
+            logger.debug("ChatMemberImp.getRole(): userType "+vClassRoomUserType);
             Occupant o = chatRoom.getOccupant(this);
 
             if (o == null)
             {
                 if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_STUDENT))
-                    return ChatRoomMemberRole.GUEST;
+                {
+                    role = ChatRoomMemberRole.GUEST;
+                }
                 else if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
-                    return ChatRoomMemberRole.MODERATOR;
-
-                return ChatRoomMemberRole.GUEST;
+                    role = ChatRoomMemberRole.MODERATOR;
+                else
+                    role = ChatRoomMemberRole.GUEST;
             }
             else
             {
@@ -195,13 +214,12 @@ public class ChatMemberImpl
                     = ChatRoomJabberImpl.smackRoleToScRole(
                         o.getRole(), o.getAffiliation());
 
-                if(role ==  ChatRoomMemberRole.MODERATOR && vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
-                    role = ChatRoomMemberRole.MODERATOR;
-                else if(role == ChatRoomMemberRole.GUEST && vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_STUDENT))
+                if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_STUDENT))
                     role = ChatRoomMemberRole.GUEST;
+                else if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
+                    role = ChatRoomMemberRole.MODERATOR;
                 else
                     role = ChatRoomMemberRole.GUEST;
-
             }
         }
         return this.role;
