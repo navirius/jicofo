@@ -515,7 +515,7 @@ public abstract class AbstractAuthAuthority
         response.setSessionId(session.getSessionId());
     }
 
-    protected void authenticateJidWithBackend(AuthenticationSession session, Jid peerJid, ConferenceIq responseConf)
+    protected boolean authenticateJidWithBackend(Jid peerJid, AuthenticationSession session)
     {
         String userIdWithDomain = peerJid.toString();
         String[] splitedString = userIdWithDomain.split("@", 2);
@@ -524,9 +524,13 @@ public abstract class AbstractAuthAuthority
             logger.debug("Request getUserType API. User id: "+splitedString[0]);
             try
             {
+                JitsiMeetConferenceImpl conference = focusManager.getConference(session.getRoomName());
+                String conferenceId = "";
+                if(conference!=null)
+                    conference.getId();
                 Response<UserLoginResponModel> response = RetrofitInstance.getInstance()
                         .create(VirtualClassroomService.class)
-                        .userLogin(new UserLoginRequestModel(splitedString[0], splitedString[0]))
+                        .userLogin(new UserLoginRequestModel(splitedString[0], splitedString[0], session.getSessionId(), conferenceId, session.getRoomName().toString()))
                         .execute();
 
                 if(response!=null && response.body()!=null)
@@ -534,15 +538,27 @@ public abstract class AbstractAuthAuthority
                     UserLoginResponModel userTypeResponseModel = response.body();
                     if(userTypeResponseModel.isStatus())
                     {
-                        authenticateJidWithSession(session, peerJid, responseConf);
+                        logger.debug("authenticateJidWithBackend() logged to backend");
+                        return true;
                     }
+                    else
+                    {
+                        logger.error("authenticateJidWithBackend() loggin failed, should not go here, because auth already done with prosody");
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    logger.error("authenticateJidWithBackend() response should not null");
+                    return false;
                 }
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
+        return false;
     }
     /**
      * {@inheritDoc}

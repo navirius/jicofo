@@ -174,8 +174,7 @@ public class ChatRoomRoleAndPresence
                 owner = null;
                 electNewOwner();
             }
-            if (ChatRoomMemberPresenceChangeEvent
-                        .MEMBER_KICKED.equals(eventType))
+            if (ChatRoomMemberPresenceChangeEvent.MEMBER_KICKED.equals(eventType))
             {
                 conference.onMemberKicked(sourceMember);
             }

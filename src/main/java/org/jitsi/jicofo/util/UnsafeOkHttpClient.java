@@ -1,6 +1,7 @@
 package org.jitsi.jicofo.util;
 
 import okhttp3.OkHttpClient;
+import org.jitsi.utils.logging.Logger;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
@@ -9,6 +10,7 @@ import javax.net.ssl.X509TrustManager;
 import java.security.cert.CertificateException;
 
 public class UnsafeOkHttpClient {
+    private final static Logger logger = Logger.getLogger(UnsafeOkHttpClient.class);
     public static OkHttpClient.Builder getUnsafeOkHttpClientBuilder(OkHttpClient.Builder builder)
     {
         try
@@ -48,6 +50,7 @@ public class UnsafeOkHttpClient {
             builder.hostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
+                    logger.debug("Allowed unsafe SSL "+hostname);
                     return true;
                 }
             });

@@ -204,7 +204,7 @@ public class ChatMemberImpl
                     role = ChatRoomMemberRole.GUEST;
                 }
                 else if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
-                    role = ChatRoomMemberRole.MODERATOR;
+                    role = ChatRoomMemberRole.OWNER;
                 else
                     role = ChatRoomMemberRole.GUEST;
             }
@@ -217,7 +217,7 @@ public class ChatMemberImpl
                 if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_STUDENT))
                     role = ChatRoomMemberRole.GUEST;
                 else if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
-                    role = ChatRoomMemberRole.MODERATOR;
+                    role = ChatRoomMemberRole.OWNER;
                 else
                     role = ChatRoomMemberRole.GUEST;
             }
@@ -392,6 +392,7 @@ public class ChatMemberImpl
     @Override
     public String getUserType()
     {
+        logger.debug("getUserType() start");
         if(userType!=null)
             return userType;
 
@@ -404,12 +405,14 @@ public class ChatMemberImpl
 
             if(response != null && response.body()!=null)
             {
+                logger.debug("getUserType() userType "+userType);
                 userType = response.body().getUserType();
                 return userType;
             }
         }
         catch (IOException e)
         {
+            logger.debug("getUserType() Error");
             e.printStackTrace();
 
         }
