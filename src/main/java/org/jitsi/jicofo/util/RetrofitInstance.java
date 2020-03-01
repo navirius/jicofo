@@ -85,7 +85,7 @@ public class RetrofitInstance {
                     }
                 });
 
-        UnsafeOkHttpClient.getUnsafeOkHttpClientBuilder(builder);
+        builder = UnsafeOkHttpClient.getUnsafeOkHttpClientBuilder(builder);
         return builder;
     }
 
