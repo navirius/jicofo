@@ -1,8 +1,13 @@
 package org.jitsi.jicofo.auth.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class BaseResponseModel {
+    @SerializedName("status")
     boolean status;
+    @SerializedName("message")
     String message;
+    @SerializedName("userIdRequest")
     String userIdRequest;
 
     public boolean isStatus()

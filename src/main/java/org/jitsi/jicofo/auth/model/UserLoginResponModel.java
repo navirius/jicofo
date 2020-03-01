@@ -4,8 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class UserLoginResponModel extends BaseResponseModel
 {
-    @SerializedName("status")
-    boolean status;
     @SerializedName("userType")
     String userType;
     @Override
