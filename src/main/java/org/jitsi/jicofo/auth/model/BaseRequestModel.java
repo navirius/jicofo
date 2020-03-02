@@ -2,7 +2,10 @@ package org.jitsi.jicofo.auth.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class BaseRequestModel {
+import java.io.Serializable;
+
+public class BaseRequestModel implements Serializable
+{
     @SerializedName("status")
     boolean status;
     @SerializedName("message")

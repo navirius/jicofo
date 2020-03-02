@@ -524,13 +524,19 @@ public abstract class AbstractAuthAuthority
             logger.debug("Request getUserType API. User id: "+peerJid.toString());
             try
             {
+                String userId = splitedString[0].toUpperCase();
+                String userPassword = splitedString[0].toUpperCase();
+
                 JitsiMeetConferenceImpl conference = focusManager.getConference(session.getRoomName());
                 String conferenceId = "";
                 if(conference!=null)
-                    conference.getId();
+                    conferenceId = conference.getId();
+                else
+                    conferenceId="";
+                UserLoginRequestModel request = new UserLoginRequestModel(userId, userPassword, session.getSessionId(), conferenceId, session.getRoomName().toString());
                 Response<UserLoginResponModel> response = RetrofitInstance.getInstance()
                         .create(VirtualClassroomService.class)
-                        .userLogin(new UserLoginRequestModel(splitedString[0].toUpperCase(), splitedString[0].toUpperCase(), session.getSessionId(), conferenceId, session.getRoomName().toString()))
+                        .userLogin(request)
                         .execute();
 
                 if(response!=null && response.body()!=null)

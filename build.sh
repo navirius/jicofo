@@ -1,2 +1,1 @@
-
-mvn -U clean package -DskipTests
+mvn -U -DproxySet=true -DproxyHost=10.103.10.138 -DproxyPort=3128 clean package -DskipTests

@@ -71,7 +71,8 @@ public class RetrofitInstance {
                          * If user Authenticated Add Authorization Header
                          * else Proceed with original Request
                          */
-                        RequestBody requestBody = JsonMaker(original.body());
+                        //RequestBody requestBody = JsonMaker(original.body());
+                        RequestBody requestBody = original.body();
                         Request.Builder requestBuilder = original.newBuilder();
 
                         if (requestBody != null) {
@@ -108,10 +109,11 @@ public class RetrofitInstance {
 //            obj.put("requestMsisdn", AppUtils.getMsisdn(mSharedPreferences));
 //            obj.put("requestRecCategory",AppUtils.getUserRecCategory(mSharedPreferences));
 //            obj.put("requestAliasName",AppUtils.getAliasName(mSharedPreferences));
-            obj.put("appDetails", getFooter());
+            // obj.put("appDetails", getFooter());
             jsonStr = new Gson().toJson(obj);
             logger.debug("RequestBody_JsonMakerResult : "+jsonStr);
-            return RequestBody.create(requestBody.contentType(), obj.toString());
+            //return RequestBody.create(requestBody.contentType(), jsonStr);
+            return RequestBody.create(jsonStr, requestBody.contentType());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
