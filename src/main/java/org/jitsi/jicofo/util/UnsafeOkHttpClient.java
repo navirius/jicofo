@@ -3,10 +3,7 @@ package org.jitsi.jicofo.util;
 import okhttp3.OkHttpClient;
 import org.jitsi.utils.logging.Logger;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 import java.security.cert.CertificateException;
 
 public class UnsafeOkHttpClient {
@@ -37,23 +34,23 @@ public class UnsafeOkHttpClient {
             };
 
             // Install the all-trusting trust manager
-            //final SSLContext sslContext = SSLContext.getInstance("SSL");
-            //sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            final SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
 
             // Create an ssl socket factory with our all-trusting manager
-            //final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
             //MemorizingTrustManager mtm = new MemorizingTrustManager(context);
             //final SSLSocketFactoryCompat sslSocketFactory = new SSLSocketFactoryCompat();
 
-            //builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
-            builder.hostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    logger.debug("Allowed unsafe SSL "+hostname);
-                    return true;
-                }
-            });
+            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
+//            builder.hostnameVerifier(new HostnameVerifier() {
+//                @Override
+//                public boolean verify(String hostname, SSLSession session) {
+//                    logger.debug("Allowed unsafe SSL "+hostname);
+//                    return true;
+//                }
+//            });
 
             return builder;
 
