@@ -7,9 +7,10 @@ public class UserLoginRequestModel extends BaseRequestModel
     public UserLoginRequestModel(String userId, String password, String sessionId, String conferenceId, String roomName)
     {
         this.userId = userId;
-        this.password=password;
+        this.password = password;
         this.sessionId = sessionId;
         this.conferenceId = conferenceId;
+        this.roomName = roomName;
 
     }
     @SerializedName("userId")

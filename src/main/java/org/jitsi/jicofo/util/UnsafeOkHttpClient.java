@@ -34,9 +34,6 @@ public class UnsafeOkHttpClient {
                         }
                     }
             };
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new SecureRandom());
-            builder.sslSocketFactory(sslContext.getSocketFactory());
 
             // Install the all-trusting trust manager
             final SSLContext sslContext = SSLContext.getInstance("SSL");
