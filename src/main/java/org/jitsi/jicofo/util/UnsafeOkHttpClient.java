@@ -44,13 +44,13 @@ public class UnsafeOkHttpClient {
             //final SSLSocketFactoryCompat sslSocketFactory = new SSLSocketFactoryCompat();
 
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
-//            builder.hostnameVerifier(new HostnameVerifier() {
-//                @Override
-//                public boolean verify(String hostname, SSLSession session) {
-//                    logger.debug("Allowed unsafe SSL "+hostname);
-//                    return true;
-//                }
-//            });
+            builder.hostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    logger.debug("Allowed unsafe SSL "+hostname);
+                    return true;
+                }
+            });
 
             return builder;
 
