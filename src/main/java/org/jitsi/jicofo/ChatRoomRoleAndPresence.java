@@ -223,6 +223,7 @@ public class ChatRoomRoleAndPresence
             return;
         }
 
+        boolean isFound = false;
         for (ChatRoomMember member : chatRoom.getMembers())
         {
             if (conference.isFocusMember((XmppChatMember) member)
@@ -238,6 +239,16 @@ public class ChatRoomRoleAndPresence
                 owner = member;
                 logger.info(
                     "Owner already in the room: " + member.getName());
+                isFound = true;
+                break;
+            }
+            else if (ChatRoomMemberRole.MODERATOR.compareTo(member.getRole()) >= 0)
+            {
+                // Select existing owner
+                owner = member;
+                logger.info(
+                        "Owner/moderator already in the room: " + member.getName());
+                isFound = true;
                 break;
             }
             else

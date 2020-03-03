@@ -95,10 +95,10 @@ public class XMPPDomainAuthAuthority
         // Authenticate JID with session(if it exists)
         if (session != null)
         {
-            if(!authenticateJidWithBackend(peerJid, session))
-            {
-                return ErrorFactory.createNotAcceptableError(query,"Error userid backend validation");
-            }
+//            if(!authenticateJidWithBackend(peerJid, session))
+//            {
+//                return ErrorFactory.createNotAcceptableError(query,"Error userid backend validation");
+//            }
             authenticateJidWithSession(session, peerJid, response);
         }
 

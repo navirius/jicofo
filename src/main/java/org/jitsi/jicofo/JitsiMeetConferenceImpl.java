@@ -2272,8 +2272,8 @@ public class JitsiMeetConferenceImpl
         }
         // Only moderators can mute others
         if (!fromJid.equals(toBeMutedJid)
-            && ChatRoomMemberRole.MODERATOR.compareTo(
-                principal.getChatMember().getRole()) < 0)
+            //&& ChatRoomMemberRole.MODERATOR.compareTo(principal.getChatMember().getRole()) < 0)
+            && ChatRoomMemberRole.MODERATOR.compareTo(principal.getChatMember().getRole()) > 0)
         {
             logger.warn(
                 "Permission denied for mute operation from " + fromJid);

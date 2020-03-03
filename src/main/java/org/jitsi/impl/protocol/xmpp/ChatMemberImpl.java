@@ -204,7 +204,7 @@ public class ChatMemberImpl
                     role = ChatRoomMemberRole.GUEST;
                 }
                 else if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
-                    role = ChatRoomMemberRole.OWNER;
+                    role = ChatRoomMemberRole.MODERATOR;
                 else
                     role = ChatRoomMemberRole.GUEST;
             }
@@ -217,7 +217,7 @@ public class ChatMemberImpl
                 if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_STUDENT))
                     role = ChatRoomMemberRole.GUEST;
                 else if(vClassRoomUserType.equalsIgnoreCase(XmppChatMember.USER_TYPE_TEACHER))
-                    role = ChatRoomMemberRole.OWNER;
+                    role = ChatRoomMemberRole.MODERATOR;
                 else
                     role = ChatRoomMemberRole.GUEST;
             }
