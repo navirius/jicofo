@@ -34,6 +34,7 @@ public class RetrofitInstance {
 
         if (retrofit == null)
         {
+
             retrofit = new Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().serializeNulls().create()))
                     .baseUrl(AppConstants.VCLASROOM_SERVICE_URL)
@@ -46,6 +47,7 @@ public class RetrofitInstance {
         Retrofit  retrofit2 = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().serializeNulls().create()))
                 .baseUrl(AppConstants.VCLASROOM_SERVICE_URL)
+                .client(getHeaders().build())
                 .build();
 
         return retrofit2;
@@ -56,11 +58,11 @@ public class RetrofitInstance {
      * @return Interceptor , Added Authorization Interceptor
      */
     private static OkHttpClient.Builder getHeaders() {
-        builder = new OkHttpClient().newBuilder()
+        builder = UnsafeOkHttpClient.getUnsafeOkHttpClientBuilder()
+                .retryOnConnectionFailure(true)
                 .connectTimeout(AppConstants.AppTimeOut, TimeUnit.SECONDS)
                 .readTimeout(AppConstants.AppTimeOut, TimeUnit.SECONDS)
                 .writeTimeout(AppConstants.AppTimeOut, TimeUnit.SECONDS)
-                //.addNetworkInterceptor(new StethoInterceptor())
                 .addInterceptor(createLoggingBodyInterceptor())
                 .addInterceptor(new Interceptor() {
                     @Override
@@ -85,8 +87,6 @@ public class RetrofitInstance {
                         return chain.proceed(original);
                     }
                 });
-
-        builder = UnsafeOkHttpClient.getUnsafeOkHttpClientBuilder(builder);
         return builder;
     }
 

@@ -400,7 +400,7 @@ public class ChatMemberImpl
         {
             Response<UserTypeResponseModel> response = RetrofitInstance.createInstance()
                     .create(VirtualClassroomService.class)
-                    .getUserType(new UserTypeRequestModel(getUserId(),""))
+                    .getUserType(new UserTypeRequestModel(getUserId().toUpperCase(),""))
                     .execute();
 
             if(response != null && response.body()!=null)
@@ -429,7 +429,7 @@ public class ChatMemberImpl
             String[] splitJid = jid.split("@", 2);
             if (splitJid.length == 2)
             {
-                logger.debug("getUserId(): splitJid "+ splitJid);
+                logger.debug("getUserId(): splitJid "+ splitJid[0]);
                 return splitJid[0];
             }
             else
