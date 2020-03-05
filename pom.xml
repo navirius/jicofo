@@ -339,6 +339,7 @@
               <descriptorRefs>
                 <descriptorRef>jar-with-dependencies</descriptorRef>
               </descriptorRefs>
+              <finalName>${project.artifactId}-${project.version}-${build.time}</finalName>
             </configuration>
           </execution>
         </executions>
@@ -371,7 +372,27 @@
           </archive>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.10</version>
+        <executions>
+          <execution>
+            <id>timestamp-property</id>
+            <goals>
+              <goal>timestamp-property</goal>
+            </goals>
+            <configuration>
+              <name>build.time</name>
+              <pattern>yyyy-MM-dd_HH-mm</pattern>
+              <timeZone>GMT+7</timeZone>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+
   </build>
 
   <repositories>
